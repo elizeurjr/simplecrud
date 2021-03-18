@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:simplecrud/data/dummy.users.dart';
 import 'package:simplecrud/models/user.dart';
 
 class Users with ChangeNotifier {
+  static const _baseUrl = 'https://simple-crudzeu-default-rtdb.firebaseio.com/';
   final Map<String, User> _items = {...DUMMY_USERS};
 
   List<User> get all {
@@ -19,7 +22,7 @@ class Users with ChangeNotifier {
     return _items.values.elementAt(i);
   }
 
-  void put(User user) {
+  Future<void> put(User user) async {
     if (user == null) {
       return;
     }
@@ -37,13 +40,23 @@ class Users with ChangeNotifier {
         ),
       );
     } else {
-      final id = Random().nextDouble().toString();
+      final response = await http.post(
+        "$_baseUrl/users.json",
+        body: json.encode({
+          'name': user.name,
+          'email': user.email,
+          'avatarUrl': user.avatarUrl,
+        }),
+      );
+
+      final id = json.decode(response.body)['name'];
+
       _items.putIfAbsent(
         id,
         () => User(
           id: id,
           name: user.name,
-          email: user.name,
+          email: user.email,
           avatarUrl: user.avatarUrl,
         ),
       );
@@ -53,7 +66,7 @@ class Users with ChangeNotifier {
   }
 
   void remove(User user) {
-    if(user != null && user.id != null) {
+    if (user != null && user.id != null) {
       _items.remove(user.id);
       notifyListeners();
     }
