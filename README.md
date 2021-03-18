@@ -1,6 +1,6 @@
 # simplecrud
 
-A new Flutter project.
+A new Flutter project for studying concepts and usability in crud. 
 
 ## Getting Started
 
